@@ -26,7 +26,7 @@ def criar_produto(produto: ProdutoCreate, db: Session = Depends(get_db)):
     db.add(novo_produto)
     db.commit()
     db.refresh(novo_produto)
-    return novo_produ
+    return novo_produto
 
 # DELETE /produtos/{id} -> remove um produto do banco de dados
 @app.delete('/produtos/{produto_id}', status_code=204)
