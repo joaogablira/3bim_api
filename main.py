@@ -1,12 +1,25 @@
+from fastapi import HTTPException
+
 from fastapi import FastAPI, Depends
 from sqlalchemy.orm import Session
 from database import Base, engine, get_db
 from models import ProdutoDB
+from models import FuncionarioDB
+
 from schemas import ProdutoCreate, ProdutoResponse
-from fastapi import HTTPException
+from schemas import FuncionarioCreate, FuncionarioResponse
 
 Base.metadata.create_all(bind=engine) # cria as tabelas, se ainda não existirem
+
 app = FastAPI()
+
+app.add_middleware(
+ CORSMiddleware,
+ allow_origins=['*'],
+ # em produção, restringir para o domínio real do front-end
+ allow_methods=['*'],
+ allow_headers=['*'],
+)
 
 @app.get('/produtos', response_model=list[ProdutoResponse])
 def listar_produtos(db: Session = Depends(get_db)):
@@ -39,13 +52,56 @@ def remover_produto(produto_id: int, db: Session = Depends(get_db)):
 
 # PUT /produtos/{id} -> atualiza um produto existente no banco
 @app.put('/produtos/{produto_id}', response_model=ProdutoResponse)
-def atualizar_produto(produto_id: int, dados: ProdutoCreate, db:
-    Session = Depends(get_db)): produto = db.query(ProdutoDB).filter(ProdutoDB.id == produto_id).first()
+def atualizar_produto(produto_id: int, dados: ProdutoCreate, db: Session = Depends(get_db)):
+    produto = db.query(ProdutoDB).filter(ProdutoDB.id == produto_id).first()
     if produto is None:
         raise HTTPException(status_code=404, detail='Produto não encontrado')
-        produto.nome = dados.nome
-        produto.preco = dados.preco
-        produto.quantidade = dados.quantidade
-        db.commit()
-        db.refresh(produto)
+    produto.nome = dados.nome
+    produto.preco = dados.preco
+    produto.quantidade = dados.quantidade
+    db.commit()
+    db.refresh(produto)
     return produto
+
+@app.get('/funcionarios', response_model=list[FuncionarioResponse])
+def listar_funcionarios(db: Session = Depends(get_db)):
+    return db.query(FuncionarioDB).all()
+
+#GET /funcionarios/{id} -> retorna um único funcionario pelo id
+@app.get('/funcionarios/{funcionario_id}', response_model=FuncionarioResponse)
+def obter_funcionario(funcionario_id: int, db: Session = Depends(get_db)):
+    funcionario = db.query(FuncionarioDB).filter(FuncionarioDB.id == funcionario_id).first()
+    if funcionario is None:
+        raise HTTPException(status_code=404, detail='Funcionário não encontrado')
+    return funcionario
+
+@app.post('/funcionarios', response_model=FuncionarioResponse, status_code=201)
+def criar_funcionario(produto: FuncionarioCreate, db: Session = Depends(get_db)):
+    novo_funcionario = FuncionarioDB(**Funcionario.dict())
+    db.add(novo_funcionario)
+    db.commit()
+    db.refresh(novo_funcionario)
+    return novo_funcionario
+
+# DELETE /produtos/{id} -> remove um produto do banco de dados
+@app.delete('/funcionarios/{funcionario_id}', status_code=204)
+def remover_funcionario(produto_id: int, db: Session = Depends(get_db)):
+    funcionario = db.query(FuncionarioDB).filter(FuncionarioDB.id == funcionario_id).first()
+    if funcionario is None:
+        raise HTTPException(status_code=404, detail='Funcionário não encontrado')
+    db.delete(funcionario)
+    db.commit()
+    return {'mensagem': 'Funcionário excluído!'}
+
+@app.put('/funcionarios/{funcionario_id}', response_model=FuncionarioResponse)
+def atualizar_funcionario(funcionario_id: int, dados: FuncionarioCreate, db: Session = Depends(get_db)):
+    funcionario = db.query(FuncionarioDB).filter(FuncionarioDB.id == funcionario_id).first()
+    if funcionario is None:
+        raise HTTPException(status_code=404, detail='Funcionário não encontrado')
+    funcionario.nome = dados.nome
+    funcionario.salario = dados.salario
+    funcionario.cargo = dados.cargo
+    funcionario.departamento = dados.departamento
+    db.commit()
+    db.refresh(funcionario)
+    return funcionario
