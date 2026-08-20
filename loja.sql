@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Tempo de geração: 06-Ago-2026 às 15:32
+-- Tempo de geração: 20-Ago-2026 às 15:53
 -- Versão do servidor: 10.4.22-MariaDB
 -- versão do PHP: 8.1.2
 
@@ -20,8 +20,6 @@ SET time_zone = "+00:00";
 --
 -- Banco de dados: `loja`
 --
-CREATE DATABASE IF NOT EXISTS `loja` DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;
-USE `loja`;
 
 -- --------------------------------------------------------
 
@@ -42,7 +40,7 @@ CREATE TABLE `produtos` (
 
 INSERT INTO `produtos` (`id`, `nome`, `preco`, `quantidade`) VALUES
 (1, 'caneta bic', 4, 20),
-(2, 'caneta bic', 4, 20);
+(2, 'caneta stabillo', 12, 40);
 
 --
 -- Índices para tabelas despejadas
