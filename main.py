@@ -10,17 +10,9 @@ from schemas import ProdutoCreate, ProdutoResponse
 from schemas import FuncionarioCreate, FuncionarioResponse
 
 Base.metadata.create_all(bind=engine) # cria as tabelas, se ainda não existirem
-
 app = FastAPI()
 
-app.add_middleware(
- CORSMiddleware,
- allow_origins=['*'],
- # em produção, restringir para o domínio real do front-end
- allow_methods=['*'],
- allow_headers=['*'],
-)
-
+# Rota /produtos
 @app.get('/produtos', response_model=list[ProdutoResponse])
 def listar_produtos(db: Session = Depends(get_db)):
     return db.query(ProdutoDB).all()
@@ -63,6 +55,10 @@ def atualizar_produto(produto_id: int, dados: ProdutoCreate, db: Session = Depen
     db.refresh(produto)
     return produto
 
+
+#-------------------------------------------------------------------------------------
+
+# Rota /funcionarios
 @app.get('/funcionarios', response_model=list[FuncionarioResponse])
 def listar_funcionarios(db: Session = Depends(get_db)):
     return db.query(FuncionarioDB).all()
@@ -76,16 +72,16 @@ def obter_funcionario(funcionario_id: int, db: Session = Depends(get_db)):
     return funcionario
 
 @app.post('/funcionarios', response_model=FuncionarioResponse, status_code=201)
-def criar_funcionario(produto: FuncionarioCreate, db: Session = Depends(get_db)):
-    novo_funcionario = FuncionarioDB(**Funcionario.dict())
+def criar_funcionario(funcionario: FuncionarioCreate, db: Session = Depends(get_db)):
+    novo_funcionario = FuncionarioDB(**funcionario.dict())
     db.add(novo_funcionario)
     db.commit()
     db.refresh(novo_funcionario)
     return novo_funcionario
 
-# DELETE /produtos/{id} -> remove um produto do banco de dados
+# DELETE /funcionarios/{id} -> remove um funcionário do banco de dados
 @app.delete('/funcionarios/{funcionario_id}', status_code=204)
-def remover_funcionario(produto_id: int, db: Session = Depends(get_db)):
+def remover_funcionario(funcionario_id: int, db: Session = Depends(get_db)):
     funcionario = db.query(FuncionarioDB).filter(FuncionarioDB.id == funcionario_id).first()
     if funcionario is None:
         raise HTTPException(status_code=404, detail='Funcionário não encontrado')

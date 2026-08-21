@@ -12,4 +12,20 @@ class ProdutoResponse(ProdutoBase):
     id: int
 
 class Config:
+    from_attributes = True      
+    
+
+class FuncionarioBase(BaseModel):
+    nome: str
+    cargo: str
+    departamento: str
+    salario: float
+
+class FuncionarioCreate(FuncionarioBase):
+    pass
+
+class FuncionarioResponse(FuncionarioBase):
+    id: int
+
+class Config:
     from_attributes = True
